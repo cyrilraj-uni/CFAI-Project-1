@@ -18,3 +18,9 @@ A web application to compare Bubble Sort and Merge Sort performance.
 1. Generate random numbers or enter your own
 2. Click "Sort & Benchmark"
 3. Compare the sorting times
+
+## Technology used
+1. Flask framework for the backend
+2. Modern CSS features for smooth animations and HTML for basic structure are used
+
+
