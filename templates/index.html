@@ -3,96 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorting Algorithm Visualizer</title>
+    <title>Sorting Algorithm Visualizer | Bubble Sort vs Merge Sort</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            background-color: #f4f4f4;
         }
+
         .container {
+            max-width: 900px;
+            margin: 0 auto;
             background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            transition: transform 0.2s;
+        }
+
+        .section:hover {
+            transform: translateX(5px);
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            font-size: 1.3em;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        input, textarea, button {
+            padding: 12px 15px;
+            font-size: 14px;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
         }
-        input, button {
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
+
         input {
-            width: 70%;
+            flex: 1;
+            min-width: 150px;
         }
+
+        textarea {
+            width: 100%;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
         button {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             cursor: pointer;
-            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
         }
+
         button:hover {
-            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
+
+        button:active {
+            transform: translateY(0);
+        }
+
         .generate-btn {
-            background-color: #2196F3;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
+
+        .sort-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            font-size: 1.1em;
+            padding: 15px;
+            width: 100%;
+        }
+
         .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .time-card {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .time-item {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .time-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .time-label {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .bubble-label {
+            color: #f5576c;
+        }
+
+        .merge-label {
+            color: #4facfe;
+        }
+
+        .time-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .time-unit {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .winner {
             margin-top: 20px;
             padding: 15px;
-            background-color: #e7f3ff;
-            border-radius: 5px;
-        }
-        .time {
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            text-align: center;
             font-weight: bold;
-            color: #d9534f;
+            font-size: 1.1em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: normal;
+            margin-left: 10px;
+        }
+
+        .badge-slow {
+            background: #fee;
+            color: #f5576c;
+        }
+
+        .badge-fast {
+            background: #efe;
+            color: #4caf50;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 600px) {
+            .time-card {
+                flex-direction: column;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            input {
+                width: 100%;
+            }
+            
+            .content {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Sorting Algorithm Benchmark</h1>
-        
-        <div>
-            <label for="numCount">Generate Random Numbers:</label>
-            <input type="number" id="numCount" value="10" min="1" max="1000">
-            <button onclick="generateRandom()" class="generate-btn">Generate Random</button>
+        <div class="header">
+            <h1> Sorting Algorithm Benchmark</h1>
+            <p>Bubble Sort vs Merge Sort | Performance Comparison</p>
         </div>
-        
-        <div>
-            <label for="numbers">Enter numbers (comma-separated):</label>
-            <textarea id="numbers" rows="3" cols="50" placeholder="e.g., 5, 2, 8, 1, 9"></textarea>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-title">
+                    <span> </span>
+                    <span>Generate Random Data</span>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="numCount" value="10" min="1" max="1000">
+                    <button onclick="generateRandom()" class="generate-btn"> Generate Random Numbers</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span> </span>
+                    <span>Or Enter Your Own Numbers</span>
+                </div>
+                <textarea id="numbers" rows="3" placeholder="Example: 5, 2, 8, 1, 9, 3, 7, 4, 6"></textarea>
+                <small style="color: #666; display: block; margin-top: 5px;"> Tip: Separate numbers with commas</small>
+            </div>
+
+            <button onclick="sortNumbers()" class="sort-btn"> Start Benchmark</button>
+
+            <div class="result" id="result">
+                <h3> Benchmark Results</h3>
+                <div class="time-card">
+                    <div class="time-item">
+                        <div class="time-label bubble-label">
+                             Bubble Sort
+                            <span class="badge badge-slow">Slower</span>
+                        </div>
+                        <div class="time-value">
+                            <span id="bubbleTime">0.00000000</span>
+                            <span class="time-unit">seconds</span>
+                        </div>
+                    </div>
+                    <div class="time-item">
+                        <div class="time-label merge-label">
+                             Merge Sort
+                            <span class="badge badge-fast">Faster</span>
+                        </div>
+                        <div class="time-value">
+                            <span id="mergeTime">0.00000000</span>
+                            <span class="time-unit">seconds</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="winner" id="winner"></div>
+            </div>
         </div>
-        
-        <button onclick="sortNumbers()">Sort & Benchmark</button>
-        
-        <div class="result" id="result" style="display:none;">
-            <h3>Results:</h3>
-            <p>Bubble Sort Time: <span id="bubbleTime" class="time"></span> seconds</p>
-            <p>Merge Sort Time: <span id="mergeTime" class="time"></span> seconds</p>
+
+        <div class="footer">
+            <p> Time Complexity: Bubble Sort O(n²) | Merge Sort O(n log n)</p>
         </div>
     </div>
 
     <script>
         async function generateRandom() {
             const count = document.getElementById('numCount').value;
+            const button = event.target;
+            button.textContent = ' Generating...';
+            button.disabled = true;
+            
             try {
                 const response = await fetch(`/generate/${count}`);
                 const data = await response.text();
                 document.getElementById('numbers').value = data;
+                button.textContent = ' Generate Random Numbers';
+                button.disabled = false;
             } catch (error) {
                 console.error('Error:', error);
+                button.textContent = ' Generate Random Numbers';
+                button.disabled = false;
+                alert('Failed to generate numbers. Please try again.');
             }
         }
         
         async function sortNumbers() {
             const numbers = document.getElementById('numbers').value;
             if (!numbers.trim()) {
-                alert('Please enter some numbers');
+                alert('Please enter some numbers or generate random ones!');
                 return;
             }
+            
+            const button = event.target;
+            button.textContent = 'Benchmarking...';
+            button.disabled = true;
             
             const formData = new FormData();
             formData.append('numbers', numbers);
@@ -104,12 +386,37 @@
                 });
                 const result = await response.json();
                 
+                const bubbleTime = parseFloat(result.bubble_time);
+                const mergeTime = parseFloat(result.merge_time);
+                
                 document.getElementById('bubbleTime').textContent = result.bubble_time;
                 document.getElementById('mergeTime').textContent = result.merge_time;
+                
+                // Determine winner
+                const winnerDiv = document.getElementById('winner');
+                if (bubbleTime < mergeTime) {
+                    winnerDiv.innerHTML = ' Winner: Bubble Sort! (Surprising but possible for small datasets)';
+                    winnerDiv.style.color = '#f5576c';
+                } else if (mergeTime < bubbleTime) {
+                    const speedup = (bubbleTime / mergeTime).toFixed(2);
+                    winnerDiv.innerHTML = `Winner: Merge Sort! (${speedup}x faster than Bubble Sort) `;
+                    winnerDiv.style.color = '#4caf50';
+                } else {
+                    winnerDiv.innerHTML = 'It\'s a tie! Both algorithms performed equally!';
+                    winnerDiv.style.color = '#666';
+                }
+                
                 document.getElementById('result').style.display = 'block';
+                
+                // Scroll to results
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while sorting');
+                alert('❌ An error occurred while sorting. Please check your input format.');
+            } finally {
+                button.textContent = ' Start Benchmark';
+                button.disabled = false;
             }
         }
     </script>
