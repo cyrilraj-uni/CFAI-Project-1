@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorting Algorithm Visualizer | Bubble Sort vs Merge Sort</title>
+    <title>Sorting & Search Algorithm Visualizer | Bubble, Merge & Linear Search</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -184,6 +184,7 @@
 
         .time-item {
             flex: 1;
+            min-width: 220px;
             background: white;
             padding: 20px;
             border-radius: 15px;
@@ -214,6 +215,10 @@
             color: #4facfe;
         }
 
+        .linear-label {
+            color: #43e97b;
+        }
+
         .time-value {
             font-size: 1.8em;
             font-weight: bold;
@@ -223,6 +228,27 @@
         .time-unit {
             font-size: 0.8em;
             color: #666;
+        }
+
+        .search-info {
+            margin-top: 10px;
+            font-size: 0.95em;
+            color: #555;
+        }
+
+        .search-info.found {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .search-info.not-found {
+            color: #c62828;
+            font-weight: 600;
+        }
+
+        .search-info.skipped {
+            color: #888;
+            font-style: italic;
         }
 
         .winner {
@@ -252,6 +278,11 @@
         .badge-fast {
             background: #efe;
             color: #4caf50;
+        }
+
+        .badge-search {
+            background: #e8f5e9;
+            color: #2e7d32;
         }
 
         .footer {
@@ -284,8 +315,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1> Sorting Algorithm Benchmark</h1>
-            <p>Bubble Sort vs Merge Sort | Performance Comparison</p>
+            <h1>Sorting &amp; Search Algorithm Benchmark</h1>
+            <p>Bubble Sort vs Merge Sort vs Linear Search | Performance Comparison</p>
         </div>
 
         <div class="content">
@@ -307,6 +338,17 @@
                 </div>
                 <textarea id="numbers" rows="3" placeholder="Example: 5, 2, 8, 1, 9, 3, 7, 4, 6"></textarea>
                 <small style="color: #666; display: block; margin-top: 5px;"> Tip: Separate numbers with commas</small>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span></span>
+                    <span>Search Target (for Linear Search)</span>
+                </div>
+                <div class="input-group">
+                    <input type="number" id="target" placeholder="Enter a number to find (optional)">
+                </div>
+                <small style="color: #666; display: block; margin-top: 5px;"> Tip: Leave empty to skip the search benchmark</small>
             </div>
 
             <button onclick="sortNumbers()" class="sort-btn"> Start Benchmark</button>
@@ -334,13 +376,24 @@
                             <span class="time-unit">seconds</span>
                         </div>
                     </div>
+                    <div class="time-item">
+                        <div class="time-label linear-label">
+                             Linear Search
+                            <span class="badge badge-search">Find</span>
+                        </div>
+                        <div class="time-value">
+                            <span id="linearTime">0.00000000</span>
+                            <span class="time-unit">seconds</span>
+                        </div>
+                        <div class="search-info" id="searchInfo">No target provided</div>
+                    </div>
                 </div>
                 <div class="winner" id="winner"></div>
             </div>
         </div>
 
         <div class="footer">
-            <p> Time Complexity: Bubble Sort O(n²) | Merge Sort O(n log n)</p>
+            <p> Time Complexity: Bubble Sort O(n²) | Merge Sort O(n log n) | Linear Search O(n)</p>
         </div>
     </div>
 
@@ -355,6 +408,12 @@
                 const response = await fetch(`/generate/${count}`);
                 const data = await response.text();
                 document.getElementById('numbers').value = data;
+                // Auto-pick a random target from the generated numbers
+                const items = data.split(',').map(s => s.trim()).filter(Boolean);
+                if (items.length > 0) {
+                    const randomPick = items[Math.floor(Math.random() * items.length)];
+                    document.getElementById('target').value = randomPick;
+                }
                 button.textContent = ' Generate Random Numbers';
                 button.disabled = false;
             } catch (error) {
@@ -367,6 +426,7 @@
         
         async function sortNumbers() {
             const numbers = document.getElementById('numbers').value;
+            const target = document.getElementById('target').value;
             if (!numbers.trim()) {
                 alert('Please enter some numbers or generate random ones!');
                 return;
@@ -378,6 +438,7 @@
             
             const formData = new FormData();
             formData.append('numbers', numbers);
+            formData.append('target', target);
             
             try {
                 const response = await fetch('/sort', {
@@ -388,21 +449,36 @@
                 
                 const bubbleTime = parseFloat(result.bubble_time);
                 const mergeTime = parseFloat(result.merge_time);
+                const linearTime = parseFloat(result.linear_time);
                 
                 document.getElementById('bubbleTime').textContent = result.bubble_time;
                 document.getElementById('mergeTime').textContent = result.merge_time;
+                document.getElementById('linearTime').textContent = result.linear_time;
+
+                // Search status line
+                const searchInfo = document.getElementById('searchInfo');
+                if (result.target === null || (target === '')) {
+                    searchInfo.textContent = 'No target provided — search skipped';
+                    searchInfo.className = 'search-info skipped';
+                } else if (result.linear_found) {
+                    searchInfo.textContent = `Found ${result.target} at index ${result.linear_index}`;
+                    searchInfo.className = 'search-info found';
+                } else {
+                    searchInfo.textContent = `${result.target} not found in the list`;
+                    searchInfo.className = 'search-info not-found';
+                }
                 
-                // Determine winner
+                // Determine sort winner
                 const winnerDiv = document.getElementById('winner');
                 if (bubbleTime < mergeTime) {
-                    winnerDiv.innerHTML = ' Winner: Bubble Sort! (Surprising but possible for small datasets)';
+                    winnerDiv.innerHTML = ' Sort Winner: Bubble Sort! (Surprising but possible for small datasets)';
                     winnerDiv.style.color = '#f5576c';
                 } else if (mergeTime < bubbleTime) {
                     const speedup = (bubbleTime / mergeTime).toFixed(2);
-                    winnerDiv.innerHTML = `Winner: Merge Sort! (${speedup}x faster than Bubble Sort) `;
+                    winnerDiv.innerHTML = ` Sort Winner: Merge Sort! (${speedup}x faster than Bubble Sort) `;
                     winnerDiv.style.color = '#4caf50';
                 } else {
-                    winnerDiv.innerHTML = 'It\'s a tie! Both algorithms performed equally!';
+                    winnerDiv.innerHTML = 'It\'s a tie! Both sort algorithms performed equally!';
                     winnerDiv.style.color = '#666';
                 }
                 
@@ -413,7 +489,7 @@
                 
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ An error occurred while sorting. Please check your input format.');
+                alert(' An error occurred while sorting. Please check your input format.');
             } finally {
                 button.textContent = ' Start Benchmark';
                 button.disabled = false;
